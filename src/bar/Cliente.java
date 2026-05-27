@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Cliente extends Thread {
 	private String nome;
-	private Pedido pedido;
+	Pedido pedido;
 	private ArrayList<Garcom> garcons;
 
 	public Cliente(String nome, Pedido pedido, ArrayList<Garcom> garcons) {
@@ -14,29 +14,36 @@ public class Cliente extends Thread {
 	}
 
 	public void run() {
-
 		try {
-			Garcom garcom = procurarGarcom();
-			garcom.anotarPedido(pedido);
-
+			Garcom g = procurarGarcom();
+			synchronized (pedido) {
+				while (!pedido.pronto) {
+					pedido.wait();
+				}
+			}
+			System.out.println(g.getNome() + " entregou o pedido para " + nome + ".");
 		} catch (InterruptedException e) {
-
+			Thread.currentThread().interrupt();
 		}
-
 	}
 
 	public Garcom procurarGarcom() throws InterruptedException {
-		while (true) {
-			for (Garcom g : garcons) {
-				if (!g.estaOcupado()) {
-					return g;
-				} else
-					continue;
+		synchronized (garcons) {
+			while (true) {
+				for (Garcom g : garcons) {
+					if (!g.estaOcupado()) {
+						g.anotarPedido(pedido);
+						if (g.chegouLim()) {
+							g.ficarOcupado();
+						}
+						System.out.println(nome + " fez o pedido " + pedido.getDescricao() + " com " + g.getNome());
+						garcons.notifyAll();
+						return g;
+					}
+				}
+				garcons.wait();
 			}
-			wait();
 		}
-	}
-
 	}
 
 	public String getNome() {

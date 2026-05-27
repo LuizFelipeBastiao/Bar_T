@@ -1,25 +1,17 @@
 package bar;
 
-import java.util.ArrayList;
+import java.util.Random;
 
 public class Bartender {
-	private String nome;
-	private boolean ocupado = false;
-	private ArrayList<Pedido> pedidosSendoPreparados = new ArrayList<>();
-	private ArrayList<Pedido> pedidosProntos = new ArrayList<>();
 
-	public String getNome() {
-		return this.nome;
+	public synchronized void pegarPedido(Pedido pedido) throws InterruptedException {
+		Random r = new Random();
+		System.out.println("Bartender pegou o pedido " + pedido.getDescricao() + " e comecou a preparar.");
+		Thread.sleep(1000 * r.nextInt(5));
+		pedido.pronto = true;
+		System.out.println("Pedido " + pedido.getDescricao() + " esta pronto.");
+		synchronized (pedido) {
+			pedido.notifyAll();
+		}
 	}
-
-	public boolean estaOcupado() {
-		if (this.ocupado == true)
-			return false;
-		return true;
-	}
-
-	public void pegarPedido(Pedido pedido) {
-		pedidosSendoPreparados.add(pedido);
-	}
-
 }
