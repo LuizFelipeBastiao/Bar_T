@@ -1,26 +1,31 @@
 package bar;
 
-import java.util.ArrayList;
-
 public class Main {
 
 	public static void main(String args[]) {
-		ArrayList<Cliente> clientes = new ArrayList<>();
-		ArrayList<Garcom> garcons = new ArrayList<>();
-		Bartender bartender = new Bartender();
 
-		for (int i = 0; i < 2; i++) {
-			garcons.add(new Garcom("Garcom " + (i + 1), 2, bartender, garcons));
+		if (args.length != 4) {
+			System.out.println("Uso: java bar.Main <qtdClientes> <qtdGarcons> <capacidade> <rodadas>");
+			return;
 		}
 
-		for (Garcom g : garcons) {
+		int qtdClientes = Integer.parseInt(args[0]);
+		int qtdGarcons = Integer.parseInt(args[1]);
+		int capacidade = Integer.parseInt(args[2]);
+		int rodadas = Integer.parseInt(args[3]);
+
+		Bartender bartender = new Bartender();
+		Bar bar = new Bar(rodadas);
+
+		for (int i = 0; i < qtdGarcons; i++) {
+			Garcom g = new Garcom(Nome.nomeAleatorio(), capacidade, bartender, bar);
+			bar.addGarcom(g);
 			g.start();
 		}
 
-		for (int i = 0; i < 4; i++) {
-			Pedido p = new Pedido(i + 1, "pedido " + (i + 1));
-			Cliente c = new Cliente("Cliente " + (i + 1), p, garcons);
-			clientes.add(c);
+		for (int i = 0; i < qtdClientes; i++) {
+
+			Cliente c = new Cliente(Nome.nomeAleatorio(), bar);
 			c.start();
 		}
 	}

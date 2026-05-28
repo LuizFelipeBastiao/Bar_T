@@ -1,6 +1,7 @@
 package bar;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Garcom extends Thread {
 	private String nome;
@@ -8,35 +9,30 @@ public class Garcom extends Thread {
 	public int lim;
 	boolean ocupado = false;
 	private Bartender bartender;
-	private ArrayList<Garcom> garcons;
+	private Bar bar;
 
-	public Garcom(String nome, int lim, Bartender bartender, ArrayList<Garcom> garcons) {
+	public Garcom(String nome, int lim, Bartender bartender, Bar bar) {
 		this.nome = nome;
 		this.pedidos = new ArrayList<>();
 		this.lim = lim;
 		this.bartender = bartender;
-		this.garcons = garcons;
+		this.bar = bar;
 	}
 
 	public void run() {
 		try {
-			while (true) {
-				Pedido p;
-				synchronized (garcons) {
-					while (pedidos.isEmpty()) {
-						garcons.wait();
-					}
-					p = pedidos.remove(0);
-					System.out.println("O " + nome + " foi entregar o pedido " + p.getDescricao() + " para o Bartender.");
+			while (!bar.estaFechado()) {
+				recebeMaximoPedidos();
+				List<Pedido> leva = registraPedidos();
+				entregaPedidos(leva);
+				synchronized (bar) {
+					if (bar.estaFechado() && pedidos.isEmpty())
+						break;
+					ocupado = false;
+					bar.notifyAll();
 				}
-				System.out.println("O " + nome + " foi entregar o pedido " + p.getDescricao() + " para o Bartender.");
-				bartender.pegarPedido(p);
-				synchronized (garcons) {
-					if (pedidos.size() < lim) {
-						ocupado = false;
-					}
-					garcons.notifyAll();
-				}
+
+				bar.incrementaRodada();
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -47,7 +43,6 @@ public class Garcom extends Thread {
 		return this.nome;
 	}
 
-	// Os metodos abaixo devem ser chamados dentro de synchronized(garcons)
 	public boolean estaOcupado() {
 		return this.ocupado;
 	}
@@ -70,5 +65,38 @@ public class Garcom extends Thread {
 
 	public void anotarPedido(Pedido pedido) {
 		pedidos.add(pedido);
+	}
+
+	private void recebeMaximoPedidos() throws InterruptedException {
+		synchronized (bar) {
+			while (pedidos.size() < lim && !bar.estaFechado()) {
+				bar.wait();
+			}
+		}
+	}
+
+	private List<Pedido> registraPedidos() throws InterruptedException {
+		List<Pedido> leva;
+		synchronized (bar) {
+			leva = new ArrayList<>(pedidos);
+			pedidos.clear();
+			System.out.println("Garçom " + nome + " foi para a copa com " + leva.size() + " pedidos");
+		}
+
+		for (Pedido p : leva) {
+			bartender.pegarPedido(p);
+		}
+		System.out.println("Garçom " + nome + " voltou da copa");
+		return leva;
+	}
+
+	private void entregaPedidos(List<Pedido> leva) {
+		for (Pedido p : leva) {
+			synchronized (p) {
+				p.pronto = true;
+				p.notifyAll();
+			}
+		}
+
 	}
 }
