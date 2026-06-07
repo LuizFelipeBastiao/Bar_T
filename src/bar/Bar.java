@@ -30,8 +30,7 @@ public class Bar {
 	public synchronized void incrementaRodada() {
 		rodadaAtual++;
 		if (rodadaAtual >= totalRodadas) {
-			fechado = true;
-			notifyAll();
+			fechar();
 		}
 	}
 
