@@ -1,18 +1,32 @@
 package bar;
 
+import java.util.Scanner;
+
 public class Main {
 
 	public static void main(String args[]) {
+		int qtdClientes;
+		int qtdGarcons;
+		int capacidade;
+		int rodadas;
 
-		if (args.length != 4) {
-			System.out.println("Uso: java bar.Main <qtdClientes> <qtdGarcons> <capacidade> <rodadas>");
-			return;
+		if (args.length == 4) {
+			qtdClientes = Integer.parseInt(args[0]);
+			qtdGarcons = Integer.parseInt(args[1]);
+			capacidade = Integer.parseInt(args[2]);
+			rodadas = Integer.parseInt(args[3]);
+		} else {
+			try (Scanner scanner = new Scanner(System.in)) {
+				System.out.println("Digite os valores no terminal: <qtdClientes> <qtdGarcons> <capacidade> <rodadas>");
+				qtdClientes = scanner.nextInt();
+				qtdGarcons = scanner.nextInt();
+				capacidade = scanner.nextInt();
+				rodadas = scanner.nextInt();
+			} catch (Exception e) {
+				System.out.println("Uso: digite 4 números inteiros no terminal.");
+				return;
+			}
 		}
-
-		int qtdClientes = Integer.parseInt(args[0]);
-		int qtdGarcons = Integer.parseInt(args[1]);
-		int capacidade = Integer.parseInt(args[2]);
-		int rodadas = Integer.parseInt(args[3]);
 
 		Bartender bartender = new Bartender();
 		Bar bar = new Bar(rodadas);

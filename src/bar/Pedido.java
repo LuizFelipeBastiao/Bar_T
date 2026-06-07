@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Pedido {
 
-	private String descricao;
+	
 	public boolean pronto = false;
 
 	String[] bebidas = { "Cerveja", "Chopp", "Refrigerante Cola", "Refrigerante Guaraná", "Refrigerante Laranja",
@@ -39,12 +39,9 @@ public class Pedido {
 			return bebidas[r];
 		}
 	}
-
-	public Pedido() {
-		descricao = descr;
-	}
+	
 
 	public String getDescricao() {
-		return descricao;
+		return descr;
 	}
 }
